@@ -1,0 +1,28 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: config-testing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ecom-backend
+  template:
+    metadata:
+      labels:
+        app: ecom-backend
+    spec:
+      containers:
+        - name: backend-container
+          image: nikhilummidi/configmap-testing:1
+          ports:
+            - containerPort: 3000
+          env:
+          - name: PORT
+            valueFrom:
+              configMapKeyRef:
+                name: backend-config
+                key: port
+
+
+    
