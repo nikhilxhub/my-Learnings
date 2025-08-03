@@ -43,6 +43,7 @@ setInterval(() => {
             try {
                 const trade = JSON.parse(latestTrade);
                 const formatted = {
+                    symbol : trade.s,
                     price: trade.p,
                     quantity: trade.q,
                     time: new Date(trade.T).toLocaleTimeString()
@@ -53,4 +54,4 @@ setInterval(() => {
             }
             latestTrade = null;
         }
-}, 1500);
+}, 500);
