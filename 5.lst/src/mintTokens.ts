@@ -6,7 +6,8 @@ import bs58 from "bs58";
 
 
 const LST_RATE = 960000000; 
-const base58Secret = process.env.PRIVATEKEY!;
+const base58Secret = process.env.PRIVATE_KEY!;
+
 const payer = Keypair.fromSecretKey(bs58.decode(base58Secret));
 const mintAdd = new PublicKey(process.env.TOKEN_MINT!);
 
@@ -22,7 +23,12 @@ export const mintTokens = async ( toAddress: string, amount: number) => {
     const to = new PublicKey(toAddress);
     // const from = new PublicKey(fromAddress);
 
-    const amt =  0.96*amount;
+
+  const DECIMALS = 9;
+  const RATE = 0.96;
+
+  const rawAmount = amount * RATE * 10 ** DECIMALS;
+  const amt = BigInt(Math.floor(rawAmount)); // ✅ safe BigInt
 
     // create or get ata
     const associatedAcc = await getOrCreateAssociatedTokenAccount(
