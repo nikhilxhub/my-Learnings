@@ -24,8 +24,8 @@ app.post("/helius",async (req,res)=>{
 
 
             // ans-- any other event could be sent to this endpoint and you'll still burn tokens and send sol.
-            // await burnTokens(fromAddress, toAddress, amount);
-            // await sendNativeTokens(fromAddress, toAddress, amount);
+            await burnTokens( toAddress, amount);
+            await sendNativeTokens( toAddress, amount);
         }
 
         res.send('Transaction successful');
