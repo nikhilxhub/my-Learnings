@@ -36,6 +36,20 @@ const client = new Map<WebSocket, {
 
 const broadCastToRoom = (room:string, payload:any) =>{
 
+    const raw = JSON.stringify(payload);
+
+    wss.clients.forEach((c) =>{
+
+        if(c.readyState === WebSocket.OPEN){
+            const meta = client.get(c);
+            if(meta?.room == room){
+                c.send(raw);
+            }
+ 
+        }
+
+        
+    });
 }
 wss.on('connection', (ws: WebSocket) =>{
     client.set(ws,{room:"general"});
@@ -73,6 +87,29 @@ wss.on('connection', (ws: WebSocket) =>{
                 
 
             }else if(msg.type == 'message'){
+                const meta = client.get(ws)!;
+
+                const chatMsg:chatMessage ={
+                    id:uuidv4() ,
+                    username:meta.username ?? "Anonymous",
+                    text: String(msg.text),
+                    ts:Date.now(),
+                    
+                };
+                
+                const arr = rooms.get(meta.room)!;
+                arr?.push(chatMsg);
+
+                if(arr.length > 200){
+                    arr.shift();
+
+                }
+
+                broadCastToRoom(meta.room, {
+                    type:'message',
+                    message: chatMsg
+                });
+
 
 
             }else{
@@ -81,11 +118,29 @@ wss.on('connection', (ws: WebSocket) =>{
 
         }catch(err){
 
+            console.error("Failed to parse client message", err);
+
         }
 
     })
 
     ws.on("close", ()=>{
+        const meta = client.get(ws)!;
+        client.delete(ws);
+        if(meta?.username){
+            const sysMsg:chatMessage = {
+                id: uuidv4(),
+                username:"System",
+                text:`${meta.username} left the chat.`,
+                ts:Date.now()
+            }
+
+            rooms.get(meta.room)!.push(sysMsg);
+            broadCastToRoom(meta.room, {
+                type:"system",
+                message:sysMsg
+            })
+        }
 
 
 
